@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ExternalLink, Phone } from "lucide-react";
+import { ArrowRight, Phone } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,39 +13,32 @@ type Props = {
   merchantId?: string | null;
   number?: string;
   pin?: string;
-  size?: "sm" | "default";
-  label?: string;
+  merchantName?: string;
 };
 
 /**
- * The hand-off.
+ * The hand-off, and the whole point of the app.
  *
- * This is the one thing CardTally cannot do for you, and the design is honest
- * about it rather than pretending otherwise. A gift card balance lives on the
- * issuer's own system; there is no public API that returns it, browsers cannot
- * reach those endpoints across origins anyway, and the services that claim to
- * check any card are either scraping retailers or collecting card numbers on a
- * server. Both are worse than opening the page yourself.
+ * CardTally cannot fetch a balance, and neither can any other web page. It was
+ * worth checking rather than assuming, so it was checked: every major issuer's
+ * balance page refuses a cross-origin fetch, sets `x-frame-options` and
+ * `frame-ancestors 'self'` so it cannot be embedded, and screens visitors with
+ * device fingerprinting. The one route left is a server pretending to be a
+ * browser convincingly enough to get past fraud detection, which is the same
+ * technique used to drain stolen cards.
  *
- * So the button does the tedious part - putting the digits on your clipboard
- * and opening the issuer's own page - and leaves the actual lookup where it
- * belongs. The number goes to the merchant, typed by you, on their site.
+ * So the number comes from the issuer, and this button removes every step
+ * between you and it: their page opens, and the digits are already on your
+ * clipboard so there is nothing to type or read back off the card.
  *
- * `window.open` runs first and synchronously, before the clipboard write is
- * awaited, because a popup blocker will veto any window opened out of a promise
- * callback.
+ * `window.open` runs first and synchronously. A popup blocker vetoes any window
+ * opened from inside a promise callback, so the clipboard write has to come
+ * after, not before.
  */
-export function BalanceButton({
-  url,
-  phone,
-  merchantId,
-  number,
-  pin,
-  size = "sm",
-  label = "Check balance",
-}: Props) {
+export function BalanceButton({ url, phone, merchantId, number, pin, merchantName }: Props) {
   const { toast } = useToast();
   const merchant = merchantById(merchantId);
+  const who = merchantName || merchant?.name || "the issuer";
 
   const go = React.useCallback(() => {
     if (!url) return;
@@ -54,7 +47,7 @@ export function BalanceButton({
     if (!number) {
       toast({
         title: "Opened the balance page",
-        description: "This card's number is not stored here, so have the card handy.",
+        description: "No number was read, so keep the card to hand.",
       });
       return;
     }
@@ -65,13 +58,13 @@ export function BalanceButton({
         toast({
           title: pin ? "Number and PIN copied" : "Number copied",
           description: pin
-            ? "Paste into the number field, then tab across and paste again for the PIN."
-            : "Paste it into the balance form.",
+            ? "Paste into the number field, then tab across and paste again."
+            : "Paste it into their balance form.",
         }),
       () =>
         toast({
           title: "Opened the balance page",
-          description: "The clipboard was blocked, so you will need to type the number.",
+          description: "The clipboard was blocked, so you will have to type the number.",
         }),
     );
   }, [url, number, pin, toast]);
@@ -79,25 +72,30 @@ export function BalanceButton({
   if (!url && !phone) return null;
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex flex-wrap items-center gap-1.5">
-        {url ? (
-          <Button size={size} variant="outline" className="gap-1.5" onClick={go}>
-            <ExternalLink className="size-3.5" />
-            {label}
-          </Button>
-        ) : null}
-        {phone ? (
-          <Button size={size} variant="ghost" asChild className="gap-1.5 text-muted-foreground">
-            <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`}>
-              <Phone className="size-3.5" />
-              {phone}
-            </a>
-          </Button>
-        ) : null}
-      </div>
+    <div className="flex flex-col gap-2">
+      {url ? (
+        <Button size="lg" className="h-12 w-full justify-between gap-2 text-base" onClick={go}>
+          <span className="truncate">Get the balance from {who}</span>
+          <ArrowRight className="size-4 shrink-0" />
+        </Button>
+      ) : null}
+
+      <p className="text-center text-[11px] leading-snug text-muted-foreground">
+        Opens {who}&apos;s own page with your digits copied. Only they know the balance — no
+        website can look it up for you.
+      </p>
+
+      {phone ? (
+        <Button variant="ghost" size="sm" asChild className="gap-1.5 text-muted-foreground">
+          <a href={`tel:${phone.replace(/[^0-9+]/g, "")}`}>
+            <Phone className="size-3.5" />
+            Or call {phone}
+          </a>
+        </Button>
+      ) : null}
+
       {merchant?.note ? (
-        <p className="text-[11px] leading-snug text-muted-foreground">{merchant.note}</p>
+        <p className="text-center text-[11px] leading-snug text-muted-foreground">{merchant.note}</p>
       ) : null}
     </div>
   );

@@ -1,42 +1,60 @@
 # CardTally
 
 Point a camera at a gift card. CardTally reads the number, the PIN and the
-balance page off it, then keeps the card in a wallet that adds itself up.
+balance page off it, and takes you straight to the issuer with the digits
+already on your clipboard.
 
-The reading happens in the tab. No photo and no card number leaves the device.
+One card, one question, one screen. Nothing is uploaded and nothing is saved.
 
-## The thing it cannot do, said plainly
+## Why it hands you off instead of just telling you
 
-**CardTally cannot tell you a balance by itself, and neither can anything else
-that does not ask the issuer.**
+The obvious version of this app fetches the balance and prints it. That version
+cannot be built, by anyone, and it is worth showing the working rather than
+asserting it. Checked against the live issuers:
 
-There is no universal gift card balance API. A balance lives on the system of
-whoever issued the card, reachable only through their own balance page, which is
-CORS-blocked to a browser and usually sits behind a CAPTCHA. The services that
-claim to check any card are doing one of two things: scraping retailers, which
-breaks the moment a page changes, or taking your card number onto their server,
-which is the thing this whole suite exists not to do.
+| Route | What actually happens |
+| :--- | :--- |
+| Fetch the balance page from the browser | `TypeError: Failed to fetch` — CORS blocked at every major issuer |
+| Embed their page in an iframe | `x-frame-options: SAMEORIGIN`, `frame-ancestors 'self'` |
+| Fetch it from a server instead | Works, until fraud detection. Target's own CSP loads `online-metrix.net` — ThreatMetrix device fingerprinting on the balance-check page |
 
-So the split is:
+There is no public gift card balance API. The only route that would return a
+number is a server impersonating a browser convincingly enough to get past bot
+detection, which is the technique used to drain stolen cards, and is not
+something this repo is going to contain.
+
+So the work splits:
 
 | Step | Who does it |
 | :--- | :--- |
 | Read the card | CardTally, in your browser |
-| Find the right balance page | CardTally |
-| Look the balance up | You, on the issuer's own site |
-| Remember what it said | CardTally |
+| Work out which issuer, and which page | CardTally |
+| Put the digits where you can paste them | CardTally |
+| Tell you the number | The issuer, on their own site |
 
-The tedious parts are automated. The lookup stays where the money is.
+Every tedious step is automated. The one step that requires the issuer stays
+with the issuer.
 
 ## What it does
 
 - Scan with the camera, a dropped photo, a file, or an image pasted from the clipboard
 - Barcode and QR decoding first, since a decoded barcode is exact
 - Text recognition for the number, PIN, expiry, balance URL and phone number
-- Recognises about fifty issuers by name, for the cards that print no URL
-- Luhn checksum on every number, so a misread digit is flagged rather than saved
-- A wallet that totals itself, flags balances older than 90 days, and syncs between open tabs
+- Recognises about fifty issuers by name, for cards that print no URL
+- Luhn checksum on every number, so a misread digit is flagged before you leave
+- One button to the issuer's page, with number and PIN copied
 - Light, dark and system themes
+
+## Nothing is saved
+
+A scanned card lives in the page's memory until you scan another or close the
+tab. There is no wallet, no history, no database, no account.
+
+That is deliberate. A gift card number with its PIN is a bearer instrument:
+anyone holding both can spend it, and unlike a credit card there is no issuer to
+call and no chargeback to file. Browser storage is not encrypted, so the safest
+place for those digits is nowhere. The only thing kept between visits is the
+theme preference.
 
 ## Reading a card
 
@@ -85,19 +103,9 @@ The balance URL printed on the back beats the built-in list every time. It comes
 from the issuer, matches the exact programme the card belongs to, and does not
 rot when a retailer moves a page.
 
-## Your cards
-
-A gift card number with its PIN is a bearer instrument. Anyone holding both can
-spend it, and unlike a credit card there is no issuer to call and no chargeback
-to file.
-
-So a saved card keeps **only its last four digits** by default. Storing the full
-number and PIN is a per-card choice with the trade stated at the checkbox, and
-turning it back off erases them rather than hiding them. `localStorage` is not
-encrypted; the interface says so instead of implying a safety it cannot provide.
-
-Everything is in this browser, on this device. Nothing syncs, and clearing site
-data deletes it.
+Every field stays editable on the result screen. OCR on foil is wrong often
+enough that a read-only display would be a dead end - one bad digit and the
+issuer's form rejects the card with nothing you could do about it.
 
 ## The OCR engine is vendored
 
@@ -139,7 +147,8 @@ and nowhere else.
 
 ## Privacy
 
-No backend, no API routes, no database, no accounts, no analytics, no trackers.
+No backend, no API routes, no database, no accounts, no analytics, no trackers,
+no stored cards.
 
 **No third-party requests either.** The typefaces are self-hosted by
 `next/font`, and the OCR engine is vendored into `public/`, so a deployed

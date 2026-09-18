@@ -56,19 +56,25 @@ function PrivacyBody() {
         scanning or leave the page.
       </p>
 
-      <h3>What is stored, and where</h3>
+      <h3>Nothing is stored</h3>
       <p>
-        Cards you add are kept in this browser&apos;s <strong>localStorage</strong>,
-        on this device. They are not synced, backed up, or visible to anyone
-        else. Clearing site data deletes them, and so does clearing your browser
-        history in most browsers.
+        <strong>CardTally does not save your cards.</strong> A scanned card
+        lives in the page&apos;s memory until you scan another one or close the
+        tab, and then it is gone. There is no wallet, no history, no database
+        and no account.
       </p>
       <p>
-        By default a saved card keeps only its last four digits. The full number
-        and PIN are stored only for cards where you tick the box that says so.
-        Be deliberate about that: <strong>localStorage is not encrypted</strong>,
-        and a gift card number with its PIN can be spent by anyone holding both.
-        On a shared or work machine, leave it off.
+        That is deliberate rather than a missing feature. A gift card number
+        with its PIN is a bearer instrument - anyone holding both can spend it,
+        and unlike a credit card there is no issuer to call and no chargeback to
+        file. Browser storage is not encrypted, so the safest place for those
+        digits is nowhere.
+      </p>
+      <p>
+        The only thing kept between visits is your light or dark theme
+        preference. An earlier version of CardTally could optionally remember
+        cards; this one deletes anything that version left behind the first time
+        you open it.
       </p>
 
       <h3>Checking a balance means leaving this page</h3>
@@ -124,19 +130,19 @@ function TermsBody() {
 
       <h3>What this is</h3>
       <p>
-        CardTally is a free, browser-based tool for reading gift cards and
-        keeping track of them. It is provided &ldquo;as is&rdquo; and &ldquo;as
-        available&rdquo;, with no warranty of any kind.
+        CardTally is a free, browser-based tool for reading a gift card and
+        getting you to the page that knows its balance. It is provided
+        &ldquo;as is&rdquo; and &ldquo;as available&rdquo;, with no warranty of
+        any kind.
       </p>
 
       <h3>It reads cards. It does not value them.</h3>
       <p>
-        <strong>
-          A balance shown here is one you typed in, not one CardTally looked up.
-        </strong>{" "}
-        It is a note to yourself, and it goes out of date the moment the card is
-        spent. Before relying on a balance — at a till, or when selling or giving
-        a card away — check it with the issuer.
+        <strong>CardTally never tells you a balance,</strong> because it has no
+        way to know one. Balances live on the issuer&apos;s systems, reachable
+        only through their own pages, which browsers are not permitted to read
+        across sites. Every figure you see comes from the issuer, on the
+        issuer&apos;s site, after you go there.
       </p>
       <p>
         Scanning is a best effort. Text recognition on foil, gloss and small
@@ -145,17 +151,11 @@ function TermsBody() {
         card before you use it.
       </p>
 
-      <h3>Your cards are your responsibility</h3>
+      <h3>Nothing is kept for you</h3>
       <p>
-        Cards are stored in your browser and nowhere else. That means no one can
-        take them from a server, and also that nothing can recover them: if you
-        clear site data, lose the device, or use a private window, they are gone.
-        Keep the card itself, or your own copy of anything that matters.
-      </p>
-      <p>
-        If you choose to store full numbers and PINs, you are choosing to keep
-        spendable value in unencrypted browser storage on that device. That is
-        yours to weigh.
+        CardTally does not remember your cards. Scan another one, or close the
+        tab, and the last card is gone for good. Keep the card itself, or write
+        the balance down somewhere of your own.
       </p>
 
       <h3>Fair use</h3>
@@ -180,8 +180,7 @@ function TermsBody() {
       <p>
         To the fullest extent permitted by law, CardTally and its author are not
         liable for any loss arising from use of this tool, including a misread
-        number, an out-of-date balance, an expired card, or cards lost from
-        browser storage.
+        number, a balance that turns out to be wrong, or an expired card.
       </p>
 
       <h3>Cost</h3>
