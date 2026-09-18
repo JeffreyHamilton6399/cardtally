@@ -142,24 +142,3 @@
 *::-webkit-scrollbar-thumb:hover {
   background-color: var(--muted-foreground);
 }
-
-/* Native color input — strip browser chrome for a clean swatch */
-input[type="color"] {
-  -webkit-appearance: none;
-  appearance: none;
-  cursor: pointer;
-  border: none;
-  padding: 0;
-  background: transparent;
-}
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-input[type="color"]::-webkit-color-swatch {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-input[type="color"]::-moz-color-swatch {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}

@@ -17,7 +17,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "CardTally: scan a gift card, find its balance",
   description:
-    "Point your camera at a gift card. CardTally reads the number, the PIN and the balance page off the card in your browser, then hands you straight to the issuer to check it. Nothing is uploaded.",
+    "Point your camera at a gift card. CardTally reads the number, the PIN and the balance page off the card on its own, then asks the issuer for the balance and shows it on the page.",
   authors: [{ name: "Jeffrey Hamilton" }],
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
@@ -26,13 +26,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "CardTally",
     description:
-      "Scan a gift card, get its number and balance page. Everything runs in the tab.",
+      "Scan a gift card, get its number and balance. Everything runs in the tab.",
     type: "website",
   },
   twitter: {
     card: "summary",
     title: "CardTally",
-    description: "Scan a gift card, get its number and balance page.",
+    description: "Scan a gift card, get its number and balance.",
   },
 };
 

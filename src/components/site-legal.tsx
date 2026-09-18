@@ -77,18 +77,25 @@ function PrivacyBody() {
         you open it.
       </p>
 
-      <h3>Checking a balance means leaving this page</h3>
+      <h3>How a balance is checked</h3>
       <p>
-        CardTally cannot read your balance. Only the company that issued the card
-        knows it, and they publish it on their own site. When you check a
-        balance, a new tab opens on <strong>the issuer&apos;s own page</strong> and
-        your card details go onto your clipboard so you can paste them there.
+        When you scan a card, CardTally&apos;s server asks the issuer for the
+        balance on your behalf. The card number and PIN you scanned are sent to
+        the issuer&apos;s own balance page, exactly as if you had typed them in
+        yourself, and the balance that comes back is shown on this page. The
+        number is held in memory only long enough to make the request and is
+        not written anywhere.
       </p>
       <p>
-        From that point you are on their website, under their privacy policy, not
-        this one. CardTally does not send them anything, cannot see what you type
-        there, and never learns the result — that is why you type the balance
-        back in yourself.
+        Not every issuer will let a server fetch their balance page: many run
+        anti-bot screening that blocks the request. When that happens,
+        CardTally tells you so plainly, and the button to open the issuer&apos;s
+        page directly is still there so you can check the balance yourself the
+        old way.
+      </p>
+      <p>
+        From the moment you tap that button, you are on the issuer&apos;s
+        website, under their privacy policy, not this one.
       </p>
 
       <h3>No tracking</h3>
@@ -136,13 +143,13 @@ function TermsBody() {
         any kind.
       </p>
 
-      <h3>It reads cards. It does not value them.</h3>
+      <h3>It reads cards and tries to value them.</h3>
       <p>
-        <strong>CardTally never tells you a balance,</strong> because it has no
-        way to know one. Balances live on the issuer&apos;s systems, reachable
-        only through their own pages, which browsers are not permitted to read
-        across sites. Every figure you see comes from the issuer, on the
-        issuer&apos;s site, after you go there.
+        <strong>CardTally asks the issuer for the balance on your behalf</strong>,
+        on the same balance page you would visit yourself. It shows the balance
+        here when the issuer allows it. When the issuer&apos;s anti-bot screening
+        blocks the automatic request - which is common - CardTally says so and
+        falls back to opening their page with your digits ready to paste.
       </p>
       <p>
         Scanning is a best effort. Text recognition on foil, gloss and small

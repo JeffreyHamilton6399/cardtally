@@ -47,9 +47,10 @@ export function CardTallyApp() {
                 How much is on this card?
               </h1>
               <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-muted-foreground">
-                Scan it and CardTally reads the number, the PIN and the balance page off the
-                card, then takes you straight to the issuer with the digits already copied.
-                The reading happens in this tab — nothing is uploaded and nothing is saved.
+                Hold the card up to the camera and CardTally reads the number, the PIN and the
+                balance page off the card on its own, then asks the issuer for the balance and
+                shows it right here. The reading happens in this tab — the card details are
+                never saved.
               </p>
             </div>
 

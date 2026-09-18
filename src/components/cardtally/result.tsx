@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Barcode, RotateCcw, ScanLine } from "lucide-react";
+import { AlertTriangle, Barcode, ExternalLink, RotateCcw, ScanLine } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,8 @@ import {
 import { cn } from "@/lib/utils";
 import { groupDigits, luhnValid, type ParsedCard } from "@/lib/card-parse";
 import { merchantById, merchants } from "@/lib/merchants";
-import { BalanceButton } from "@/components/cardtally/balance-button";
+import { useToast } from "@/hooks/use-toast";
+import { InlineBalance } from "@/components/cardtally/inline-balance";
 
 const OTHER = "__other__";
 
@@ -26,15 +27,16 @@ type Props = {
 };
 
 /**
- * What the scan found, and the one button that matters.
+ * What the scan found, and the balance - right on the page.
  *
  * The fields stay editable because OCR on foil is wrong often enough that a
  * read-only display would just be a dead end - a single misread digit and the
  * issuer's form rejects the card, with nothing the user can do about it here.
- * They are laid out quietly, under the action, because for most scans they are
- * correct and nobody needs to look at them.
+ * They are laid out quietly, under the balance, because for most scans they
+ * are correct and nobody needs to look at them.
  */
 export function Result({ parsed, onReset }: Props) {
+  const { toast } = useToast();
   const [merchantId, setMerchantId] = React.useState(parsed.merchant?.id ?? OTHER);
   const [number, setNumber] = React.useState(parsed.number);
   const [pin, setPin] = React.useState(parsed.pin);
@@ -54,22 +56,83 @@ export function Result({ parsed, onReset }: Props) {
     }
   }
 
+  // The hand-off still exists, as a fallback. When the inline check could not
+  // get a balance (anti-bot, redeem flow, network), the user can still open
+  // the issuer's own page in a new tab and have the digits ready to paste.
+  const openExternal = React.useCallback(() => {
+    const target = url || merchant?.balanceUrl;
+    if (!target) {
+      toast({ title: "No balance page known", description: "Pick the issuer below." });
+      return;
+    }
+    window.open(target, "_blank", "noopener,noreferrer");
+    if (!digits) return;
+    const payload = pin ? `${digits}\t${pin}` : digits;
+    navigator.clipboard?.writeText(payload).then(
+      () =>
+        toast({
+          title: pin ? "Number and PIN copied" : "Number copied",
+          description: "Paste into the issuer's form.",
+        }),
+      () =>
+        toast({
+          title: "Opened the page",
+          description: "The clipboard was blocked, so you will have to type the number.",
+        }),
+    );
+  }, [digits, pin, url, merchant?.balanceUrl, toast]);
+
   return (
     <div className="flex flex-col gap-4">
       <ReadStatus parsed={parsed} checksumFails={checksumFails} />
 
-      <BalanceButton
-        url={url}
-        phone={parsed.phone}
-        merchantId={merchantId === OTHER ? null : merchantId}
-        merchantName={merchant?.name}
-        number={digits}
-        pin={pin}
+      {/* The balance, fetched and shown inline. This is the primary action
+          now: the whole reason the user scanned the card is to see this
+          number. */}
+      <InlineBalance
+        card={parsed}
+        editable={{
+          merchantId: merchantId === OTHER ? null : merchantId,
+          number: digits,
+          pin,
+          url,
+        }}
+        onOpenExternal={openExternal}
       />
+
+      {/* The manual hand-off, demoted. Only here because some issuers will
+          block the automatic check, and the user needs a way out. */}
+      {(url || parsed.phone) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {url ? (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-muted-foreground"
+              onClick={openExternal}
+            >
+              <ExternalLink className="size-3.5" />
+              Open {merchant?.name ?? "the issuer"}&apos;s page
+            </Button>
+          ) : null}
+          {parsed.phone ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="gap-1.5 text-muted-foreground"
+            >
+              <a href={`tel:${parsed.phone.replace(/[^0-9+]/g, "")}`}>
+                Or call {parsed.phone}
+              </a>
+            </Button>
+          ) : null}
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 rounded-lg border p-3">
         <p className="text-[11px] font-medium text-muted-foreground">
-          What was read off the card. Fix anything wrong before you go.
+          What was read off the card. Fix anything wrong, then re-check the balance.
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
@@ -100,7 +163,7 @@ export function Result({ parsed, onReset }: Props) {
               <SelectTrigger className="h-9 text-sm">
                 <SelectValue placeholder="Pick one" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="max-h-72 overflow-y-auto">
                 {merchants.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
                     {m.name}
@@ -153,7 +216,7 @@ function ReadStatus({ parsed, checksumFails }: { parsed: ParsedCard; checksumFai
     return (
       <Status tone="warn" icon={AlertTriangle}>
         The checksum on that number does not add up, so a digit is probably misread. Compare it
-        with the card before you go.
+        with the card before you trust the balance.
       </Status>
     );
   }
