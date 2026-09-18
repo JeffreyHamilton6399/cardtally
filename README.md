@@ -140,7 +140,11 @@ and nowhere else.
 ## Privacy
 
 No backend, no API routes, no database, no accounts, no analytics, no trackers.
-The only outside request the page makes is to Google Fonts.
+
+**No third-party requests either.** The typefaces are self-hosted by
+`next/font`, and the OCR engine is vendored into `public/`, so a deployed
+CardTally makes every request to its own origin and none to anyone else. The
+network panel on a live scan shows this: sixteen requests, all same-origin.
 
 Retailer names and marks belong to their owners and are used only to identify
 which card is which.

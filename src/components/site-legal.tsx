@@ -88,8 +88,10 @@ function PrivacyBody() {
       <h3>No tracking</h3>
       <p>
         There are no analytics, no advertising trackers, no cookies and no
-        fingerprinting. The only outside request the page makes is to Google
-        Fonts for its typefaces.
+        fingerprinting. There are no third-party requests at all: the typefaces
+        and the text-recognition engine are both served from this domain, so
+        opening CardTally and scanning a card contacts nobody but this site. You
+        can confirm that yourself in your browser&apos;s network panel.
       </p>
 
       <h3>Children</h3>
